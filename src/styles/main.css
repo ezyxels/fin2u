@@ -1,0 +1,61 @@
+@charset "UTF-8";
+
+@import "tailwindcss/base";
+@import "framework.css";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "tailwindcss/variants";
+
+@layer components {
+  /* Hlavní stránka - tým lidí - posunutí karet */
+  @media (min-width: 640px) {
+    .team-cards-shifted {
+      a:nth-child(2n) {
+        transform: translateY(50%);
+      }
+    }
+    .team-cards-shifted {
+      a:hover {
+        scale: 1.03;
+      }
+    }
+  }
+
+  .team-card-transition {
+    transition: opacity 900ms ease, scale 300ms ease, box-shadow 300ms ease;
+  }
+
+  .lib-input-hp {
+    display: none;
+    visibility: hidden;
+  }
+
+  /* Reference - posutuní karet ve středním sloupci - posunutí karet */
+  /*
+  @media (min-width: 1280px) {
+    .testimonial-cards-shifted {
+      .testimonial-card:nth-child(3n-1) {
+        transform: translateY(3rem);
+      }
+    }
+  }
+
+  @media (min-width: 640px) {
+    .testimonial-cards-shifted {
+      .testimonial-card:nth-child(2n) {
+        transform: translateY(3rem);
+      }
+    }
+  }
+  */
+}
+
+/* schová input type number šipky */
+
+.personalCalc input[type="number"]::-webkit-outer-spin-button,
+.personalCalc input[type="number"]::-webkit-inner-spin-button,
+.personalCalc input[type="number"] {
+  -webkit-appearance: none;
+  margin: 0;
+  -moz-appearance: textfield !important;
+}
