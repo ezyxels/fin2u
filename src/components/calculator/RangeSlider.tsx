@@ -9,6 +9,7 @@ interface RangeSliderProps {
   skip: number;
   title: string;
   unit?: string;
+  defaultValue?: number;
 }
 
 export default function RangeSlider({
@@ -19,15 +20,17 @@ export default function RangeSlider({
   skip,
   title,
   unit,
+  defaultValue,
 }: RangeSliderProps) {
-  const [value, setValue] = useState<any>(min);
+  const [value, setValue] = useState<any>(defaultValue);
   const [contentShown, setContentShown] = useState<"span" | "input">("span");
   const inputRef: any = useRef();
+
 
   useEffect(() => {
     changeData(id, min);
     min > value && setValue(min);
-    max < value && setValue(max);
+    max < value && setValue(max);  
   }, [min, max]);
 
   function setValueAndInputData(e: number) {
@@ -80,7 +83,7 @@ export default function RangeSlider({
         <button
           className="flex items-center justify-center rounded-full bg-primary/10 p-3 text-base text-secondary outline-none transition-colors duration-300 hover:bg-primary/25 focus-visible:ring-4 focus-visible:ring-primary/70"
           onClick={() =>
-            value >= min + skip && setValueAndInputData(parseInt(value) - skip)
+            value >= min + skip && setValueAndInputData(parseFloat(value) - skip)
           }
         >
           <HiMinus />
@@ -92,13 +95,13 @@ export default function RangeSlider({
             max={max}
             value={value}
             className="slider h-2 w-full appearance-none rounded-lg bg-body-200 opacity-70 outline-none transition duration-200 hover:opacity-100"
-            onChange={(e) => setValueAndInputData(parseInt(e.target.value))}
+            onChange={(e) => setValueAndInputData(parseFloat(e.target.value))}
           />
         </div>
         <button
           className="flex items-center justify-center rounded-full bg-primary/10 p-3 text-base text-secondary outline-none transition-colors duration-300 hover:bg-primary/25 focus-visible:ring-4 focus-visible:ring-primary/70"
           onClick={() =>
-            value <= max - skip && setValueAndInputData(parseInt(value) + skip)
+            value <= max - skip && setValueAndInputData(parseFloat(value) + skip)
           }
         >
           <HiPlus />
