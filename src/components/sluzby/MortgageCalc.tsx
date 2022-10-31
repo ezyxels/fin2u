@@ -132,25 +132,26 @@ type ModalProps = {
 function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
   const [isOpen, setIsOpen] = useState(Boolean);
   const [email, setEmail] = useState(String);
-  const [emailVerified, setEmailVerified] = useState(Boolean);
-  const [emailAlert, setEmailAlert] = useState(Boolean);
+  const [phone, setPhone] = useState(Number);
+  const [allVerified, setAllVerified] = useState(Boolean);
+  const [allAlert, setAllAlert] = useState(Boolean);
 
   useEffect(() => {
     setIsOpen(isModalOpen);
   }, [isModalOpen]);
 
-  function verifyEmail() {
+  function verifyAll() {
     if (
       /^([a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$/.test(
-        email
-      )
+        email) && /\d{9}/.test( phone.toString() )
+      
     ) {
-      setEmailVerified(true);
+      setAllVerified(true);
       sendEmail();
     } else {
-      setEmailAlert(true);
+      setAllAlert(true);
       setTimeout(() => {
-        setEmailAlert(false);
+        setAllAlert(false);
       }, 2500);
     }
 
@@ -160,6 +161,7 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
         "template_w729jur",
         {
           email: email,
+          phone: phone,
           kalkulacka: "Kalkulačka - " + inputData.kalkulacka,
           pujcka: "Půjčka: " + inputData.pujcka.toLocaleString() + " Kč",
           nemovitost:
@@ -209,7 +211,7 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              {!emailVerified ? (
+              {!allVerified ? (
                 <Dialog.Panel className="flex w-full max-w-md transform flex-col overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                   <button
                     className="ml-auto h-10 w-10 rounded-md border border-blue-500"
@@ -221,14 +223,14 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Zadejte e-mail
+                    Zadejte údaje pro ověření
                   </Dialog.Title>
                   <p className="mt-2 text-sm text-gray-500">
                     Pro zobrazení vašich výsledků prosím zadejte Vaší e-mailovou
-                    adresu.
+                    adresu a telefonní číslo.
                   </p>
                   <p className="text-red-500">
-                    {emailAlert && "Prosím zadejte platný email!"}
+                    {allAlert && "Prosím zadejte platný email a číslo!"}
                   </p>
                   <div className="mt-5 flex flex-col gap-5">
                     <Input
@@ -239,7 +241,15 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
                       label="Váš e-mail"
                       onChange={(e: any) => setEmail(e.target.value)}
                     />
-                    <Button type="button" onClick={() => verifyEmail()}>
+                    <Input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      isRequired
+                      label="Váše telefonní číslo"
+                      onChange={(e: any) => setPhone(e.target.value)}
+                    />
+                    <Button type="button" onClick={() => verifyAll()}>
                       Odeslat!
                     </Button>
                   </div>
