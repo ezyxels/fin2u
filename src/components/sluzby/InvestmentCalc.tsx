@@ -13,20 +13,33 @@ export default function InvestmentCalc({
 }: InvestmentCalcProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputData, setInputData] = useState({
+    kalkulacka: "Investiční",
     renta: 0,
     cerpatZa: 0,
     investovat: 0,
     urok: 7,
-    odklad: "",
-  });
+    odklad: 0,
+    cerpatCas: 0,
+  }); 
+  const [result, setResult] = useState<number>(0);
 
-  console.log(inputData);
+  function letsCalcIt() {
+    let rentYears = inputData.cerpatZa;
+    let future = (inputData.renta * 12) / (inputData.urok / 100);
+    let q = Math.pow(1 + (inputData.urok / 100) /12, inputData.cerpatZa * 12);
+    let monthly = -((inputData.urok /100 / 12) + ((-1 * future) + (q * inputData.investovat))) / (-1 + q);
+
+    console.log(monthly)
+    setResult(monthly);
+    setIsModalOpen(true);
+  }
+
 
   function changeData(id: string, value: number) {
     setInputData((prevState) => ({ ...prevState, [id]: value }));
   }
   return (
-    <div className={`flex flex-col p-5 ${className}`}>
+    <div className={`personalCalc flex flex-col p-5 ${className}`}>
       <div className="mt-24">
         <RangeSlider
           changeData={changeData}
@@ -34,6 +47,7 @@ export default function InvestmentCalc({
           min={5000}
           max={100000}
           skip={5000}
+          defaultValue={inputData.renta}
           title="Jak velkou měsíční rentu chcete?"
           unit="Kč"
         />
@@ -43,6 +57,7 @@ export default function InvestmentCalc({
           min={0}
           max={30}
           skip={1}
+          defaultValue={inputData.cerpatZa}
           title={"Za kolik let chcete peníze čerpat?"}
           unit={
             inputData.cerpatZa < 5
@@ -54,10 +69,27 @@ export default function InvestmentCalc({
         />
         <RangeSlider
           changeData={changeData}
+          id={"cerpatCas"}
+          min={0}
+          max={30}
+          skip={1}
+          defaultValue={inputData.cerpatCas}
+          title={"Jak dlouho chcete peníze čerpat?"}
+          unit={
+            inputData.cerpatCas < 5
+              ? inputData.cerpatCas === 1
+                ? "rok"
+                : "roky"
+              : "let"
+          }
+        />
+        <RangeSlider
+          changeData={changeData}
           id="investovat"
           min={0}
           max={10000000}
           skip={50000}
+          defaultValue={inputData.investovat}
           title="Kolik už jste investovali?"
           unit={"Kč"}
         />
@@ -67,12 +99,13 @@ export default function InvestmentCalc({
           min={500}
           max={100000}
           skip={1000}
+          defaultValue={inputData.odklad}
           title="Kolik můžete měsíčně odkládat?"
           unit={"Kč / měsíc"}
         />
       </div>
       <div className="mt-5 flex w-full items-center justify-center">
-        <Button type="button" onClick={() => setIsModalOpen(true)}>
+        <Button type="button" onClick={() => letsCalcIt()}>
           Spočítat
         </Button>
       </div>
@@ -80,18 +113,19 @@ export default function InvestmentCalc({
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         inputData={inputData}
+        result={result}
       />
     </div>
   );
 }
-
 type ModalProps = {
   isModalOpen: boolean;
   setIsModalOpen: any;
   inputData: any;
+  result: number;
 };
 
-function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
+function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
   const [isOpen, setIsOpen] = useState(Boolean);
   const [email, setEmail] = useState(String);
   const [emailVerified, setEmailVerified] = useState(Boolean);
@@ -108,14 +142,38 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
       )
     ) {
       setEmailVerified(true);
+      sendEmail();
     } else {
       setEmailAlert(true);
       setTimeout(() => {
         setEmailAlert(false);
       }, 2500);
     }
-  }
 
+    function sendEmail() {
+      /* emailjs.send(
+        "service_jlz369o",
+        "template_w729jur",
+        {
+          email: email,
+          kalkulacka: inputData.kalkulacka,
+          pujcka: inputData.pujcka.toLocaleString() + " Kč",
+          nemovitost: inputData.nemovitost.toLocaleString() + " Kč",
+          splatnost:
+            inputData.splatnost < 5
+              ? inputData.splatnost === 1
+                ? inputData.splatnost + " rok"
+                : inputData.splatnost + " roky"
+              : inputData.splatnost + " let",
+          sazba: inputData.sazba + " %",
+          ucelUveru: inputData.ucelUveru,
+          druhNemovitosti: inputData.druhNemovitosti,
+          vysledek: result.toLocaleString() + " Kč"
+        },
+        "user_2tNsUaIQSULo6wFXKZVCs"
+      ); */
+    }
+  }
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -152,8 +210,7 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
                     className="ml-auto h-10 w-10 rounded-md border border-blue-500"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    {" "}
-                    X{" "}
+                    X
                   </button>
                   <Dialog.Title
                     as="h3"
@@ -193,24 +250,36 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
                   <p className="mt-2 text-sm text-gray-500">
                     Vaše výsledky můžete naleznout níže
                   </p>
-                  <div className="flex w-full flex-col">
-                    {Object.entries(inputData).map((e: any, index: number) => (
-                      <div
-                        className="mt-5 flex flex-row justify-between"
-                        key={index}
-                      >
-                        <p>{e[0]}</p>
-                        {typeof e[1] === "object" && e[1] !== null ? (
-                          <div>
-                            <p>Min {e[1].min}</p>
-                            <p>Max {e[1].max}</p>
-                          </div>
-                        ) : (
-                          <p>{e[1]}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  {/* <div className="mt-7 flex w-full flex-col">
+                    <div className="flex flex-row justify-between">
+                      <p className="hidden md:block">Při půjčce v hodnotě</p>
+                      <p className="block md:hidden">Při půjčce</p>
+                      <p>{inputData.pujcka.toLocaleString()} Kč</p>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <p className="hidden md:block">A splatnostním období</p>
+                      <p className="block md:hidden">A splatnosti</p>
+                      <p>
+                        {inputData.splatnost}{" "}
+                        {inputData.splatnost < 5
+                          ? inputData.splatnost === 1
+                            ? "rok"
+                            : "roky"
+                          : "let"}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex flex-row justify-between">
+                      <p className="hidden items-end md:flex">
+                        Činní měsíční splátka
+                      </p>
+                      <p className="flex items-end md:hidden">
+                        Je měsíční splátka
+                      </p>
+                      <p className="text-lg underline underline-offset-4">
+                        {result.toLocaleString()} Kč
+                      </p>
+                    </div>
+                  </div> */}
                 </Dialog.Panel>
               )}
             </Transition.Child>

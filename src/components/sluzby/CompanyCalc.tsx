@@ -2,6 +2,7 @@ import Button from "@components/Button";
 import RangeSlider from "@components/calculator/RangeSlider";
 import Input from "@components/forms/Input";
 import SelectTemp from "@components/forms/SelectTemp";
+import emailjs from "@emailjs/browser";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
@@ -12,20 +13,31 @@ type CompanyCalcProps = {
 export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputData, setInputData] = useState({
+    kalkulacka: "Firemní Financování",
     pujcka: 0,
     zastava: true,
     zajisteni: 0,
     splatnost: 0,
     sazba: 7,
     ucetUveru: "",
-    druhNemovitosti: "",
-  });
+  }); 
+  const [result, setResult] = useState<number>(0);
+
+  function letsCalcIt() {
+    let top =
+      (inputData.sazba / 100 / 12) *
+      Math.pow(1 + inputData.sazba / 100 / 12, 12 * inputData.splatnost);
+    let bottom =
+      Math.pow(1 + inputData.sazba / 100 / 12, 12 * inputData.splatnost) - 1;
+    setResult(Math.round(inputData.pujcka * (top / bottom) * 100) / 100);
+    setIsModalOpen(true);
+  }
 
   function changeData(id: string, value: any) {
     setInputData((prevState) => ({ ...prevState, [id]: value }));
   }
   return (
-    <div className={`flex flex-col p-5 ${className}`}>
+    <div className={`personalCalc flex flex-col p-5 ${className}`}>
       <div className="mt-24">
         <div className={`mb-10 flex w-fit flex-row`}>
           <span
@@ -57,6 +69,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
               min={0}
               max={200000000}
               skip={500000}
+              defaultValue={inputData.pujcka}
               title="Kolik si chci půjčit?"
               unit="Kč"
             />
@@ -66,6 +79,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
               min={1}
               max={20}
               skip={1}
+              defaultValue={inputData.splatnost}
               title="Jak dlouho chcete splácet?"
               unit={
                 inputData.splatnost < 5
@@ -84,6 +98,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
               min={0}
               max={3000000}
               skip={50000}
+              defaultValue={inputData.pujcka}
               title="Kolik si chci půjčit?"
               unit="Kč"
             />
@@ -93,6 +108,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
               min={1}
               max={8}
               skip={1}
+              defaultValue={inputData.splatnost}
               title="Jak dlouho chcete splácet?"
               unit={
                 inputData.splatnost < 5
@@ -108,21 +124,30 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
           changeData={changeData}
           id={"zajisteni"}
           min={inputData.pujcka}
-          max={50000000}
+          max={inputData.zastava === true ? 200000000 : 50000000}
           skip={100000}
+          defaultValue={inputData.zajisteni}
           title={"Hodnota Vašeho zajištění?"}
           unit={"Kč"}
         />
         <SelectTemp
-          id="druhNemovitosti"
-          title="Jaký je druh nemovitosti?"
+          id="ucelUveru"
+          title="Účel Vašeho úvěru?"
           changeData={changeData}
-          values={["Byt", "Dům", "Rekreační objekt", "Bytový dům", "Jiný"]}
+          values={[
+            "Klasický neúčelový úvěr",
+            "Účelový podnikatelský úvěr", 
+            "Leasing", "Provozní úvěry", 
+            "Kontokorentní úvěr",
+            "Podnikatelské kreditní karty",
+            "Investiční úvěry",
+            "Úvěry se zárukou Evropského investičního fondu"
+          ]}
           className="mt-12"
         />
       </div>
       <div className="mt-5 flex w-full items-center justify-center">
-        <Button type="button" onClick={() => setIsModalOpen(true)}>
+        <Button type="button" onClick={() => letsCalcIt()}>
           Spočítat
         </Button>
       </div>
@@ -130,6 +155,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         inputData={inputData}
+        result={result}
       />
     </div>
   );
@@ -139,9 +165,10 @@ type ModalProps = {
   isModalOpen: boolean;
   setIsModalOpen: any;
   inputData: any;
+  result: any;
 };
 
-function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
+function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
   const [isOpen, setIsOpen] = useState(Boolean);
   const [email, setEmail] = useState(String);
   const [emailVerified, setEmailVerified] = useState(Boolean);
@@ -158,14 +185,39 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
       )
     ) {
       setEmailVerified(true);
+      sendEmail();
     } else {
       setEmailAlert(true);
       setTimeout(() => {
         setEmailAlert(false);
       }, 2500);
     }
-  }
 
+    function sendEmail() {
+      emailjs.send(
+        "service_jlz369o",
+        "template_w729jur",
+        {
+          email: email,
+          kalkulacka: inputData.kalkulacka,
+          pujcka: inputData.pujcka.toLocaleString() + " Kč",
+          zastava: inputData.zastava === true ? "se zástavou" : "bez zástavy",
+          nemovitost: inputData.zajisteni.toLocaleString() + " Kč",
+          splatnost:
+            inputData.splatnost < 5
+              ? inputData.splatnost === 1
+                ? inputData.splatnost + " rok"
+                : inputData.splatnost + " roky"
+              : inputData.splatnost + " let",
+          sazba: inputData.sazba + " %",
+          ucelUveru: inputData.ucelUveru,
+          druhNemovitosti: inputData.druhNemovitosti,
+          vysledek: result.toLocaleString() + " Kč"
+        },
+        "user_2tNsUaIQSULo6wFXKZVCs"
+      );
+    }
+  }
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -202,8 +254,7 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
                     className="ml-auto h-10 w-10 rounded-md border border-blue-500"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    {" "}
-                    X{" "}
+                    X
                   </button>
                   <Dialog.Title
                     as="h3"
@@ -243,23 +294,35 @@ function Modal({ isModalOpen, setIsModalOpen, inputData }: ModalProps) {
                   <p className="mt-2 text-sm text-gray-500">
                     Vaše výsledky můžete naleznout níže
                   </p>
-                  <div className="flex w-full flex-col">
-                    {Object.entries(inputData).map((e: any, index: number) => (
-                      <div
-                        className="mt-5 flex flex-row justify-between"
-                        key={index}
-                      >
-                        <p>{e[0]}</p>
-                        {typeof e[1] === "object" && e[1] !== null ? (
-                          <div>
-                            <p>Min {e[1].min}</p>
-                            <p>Max {e[1].max}</p>
-                          </div>
-                        ) : (
-                          <p>{e[1]}</p>
-                        )}
-                      </div>
-                    ))}
+                  <div className="mt-7 flex w-full flex-col">
+                    <div className="flex flex-row justify-between">
+                      <p className="hidden md:block">Při půjčce v hodnotě</p>
+                      <p className="block md:hidden">Při půjčce</p>
+                      <p>{inputData.pujcka.toLocaleString()} Kč</p>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <p className="hidden md:block">A splatnostním období</p>
+                      <p className="block md:hidden">A splatnosti</p>
+                      <p>
+                        {inputData.splatnost}{" "}
+                        {inputData.splatnost < 5
+                          ? inputData.splatnost === 1
+                            ? "rok"
+                            : "roky"
+                          : "let"}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex flex-row justify-between">
+                      <p className="hidden items-end md:flex">
+                        Činní měsíční splátka
+                      </p>
+                      <p className="flex items-end md:hidden">
+                        Je měsíční splátka
+                      </p>
+                      <p className="text-lg underline underline-offset-4">
+                        {result.toLocaleString()} Kč
+                      </p>
+                    </div>
                   </div>
                 </Dialog.Panel>
               )}

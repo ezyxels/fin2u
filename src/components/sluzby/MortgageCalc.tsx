@@ -17,7 +17,7 @@ export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
     pujcka: 0,
     nemovitost: 0,
     splatnost: 0,
-    sazba: 5.99,
+    sazba: 6,
     ucelUveru: "",
     druhNemovitosti: "",
   });
@@ -45,6 +45,7 @@ export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
           min={500000}
           max={50000000}
           skip={100000}
+          defaultValue={inputData.pujcka}
           title="Kolik si chci půjčit?"
           unit="Kč"
         />
@@ -54,6 +55,7 @@ export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
           min={inputData.pujcka}
           max={50000000}
           skip={100000}
+          defaultValue={inputData.nemovitost}
           title={"Hodnota Vaší nemovitosti?"}
           unit={"Kč"}
         />
@@ -63,6 +65,7 @@ export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
           min={1}
           max={40}
           skip={1}
+          defaultValue={inputData.splatnost}
           title="Jak dlouho chcete splácet?"
           unit={
             inputData.splatnost < 5
@@ -72,10 +75,16 @@ export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
               : "let"
           }
         />
-        <div className="mb-5 flex flex-row justify-between border-b border-b-primary pb-3">
-          <p>Současná sazba</p>
-          <p className="text-lg"> {inputData.sazba} %</p>
-        </div>
+        <RangeSlider
+          changeData={changeData}
+          id={"sazba"}
+          min={0}
+          max={12}
+          skip={0.5}
+          defaultValue={inputData.sazba}
+          title={"Sazba hypotéky?"}
+          unit={"%"}
+        />
         <SelectTemp
           id="ucelUveru"
           title="Jaký je účel úvěru?"
@@ -147,12 +156,11 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
 
     function sendEmail() {
       emailjs.send(
-        //process.env.SERVICE_ID!,
         "service_jlz369o",
         "template_w729jur",
         {
           email: email,
-          calc: inputData.kalkulacka,
+          kalkulacka: inputData.kalkulacka,
           pujcka: inputData.pujcka.toLocaleString() + " Kč",
           nemovitost: inputData.nemovitost.toLocaleString() + " Kč",
           splatnost:
@@ -164,9 +172,9 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
           sazba: inputData.sazba + " %",
           ucelUveru: inputData.ucelUveru,
           druhNemovitosti: inputData.druhNemovitosti,
+          vysledek: result.toLocaleString() + " Kč"
         },
         "user_2tNsUaIQSULo6wFXKZVCs"
-        //process.env.PUBLIC_KEY!
       );
     }
   }

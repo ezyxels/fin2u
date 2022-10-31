@@ -15,15 +15,6 @@ import type { NextPage } from "next";
 import ExportedImage from "next-image-export-optimizer";
 import { HiMail, HiPhone } from "react-icons/hi";
 
-// Účel úvěru do kalkulačky:
-// Klasický neúčelový úvěr.
-// Účelový podnikatelský úvěr.
-// Leasing.
-// Provozní úvěry.
-// Kontokorentní úvěr.
-// Podnikatelské kreditní karty.
-// Investiční úvěry.
-// Úvěry se zárukou Evropského investičního fondu.
 
 const testimonials = [
   {
