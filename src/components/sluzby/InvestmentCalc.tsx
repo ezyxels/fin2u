@@ -25,12 +25,18 @@ export default function InvestmentCalc({
 
   function letsCalcIt() {
     let rentYears = inputData.cerpatZa;
-    let future = (inputData.renta * 12) / (inputData.urok / 100);
-    let q = Math.pow(1 + (inputData.urok / 100) /12, inputData.cerpatZa * 12);
-    let monthly = -((inputData.urok /100 / 12) + ((-1 * future) + (q * inputData.investovat))) / (-1 + q);
+    let alreadyInvested = inputData.investovat;
+    let annualInterestRate = inputData.urok / 100;
+    let assumedAnnualInterestRate = 4 / 100;
+    let mih = rentYears * 12;
+    let futureInvestment = (inputData.renta * 12) / assumedAnnualInterestRate;
+    let ir = annualInterestRate / 12;
+    let q = Math.pow(1 + annualInterestRate / 12, mih);
+    let monthlyInvestment =
+      -(ir * (-1 * futureInvestment + q * alreadyInvested)) / (-1 + q);
 
-    console.log(monthly)
-    setResult(monthly);
+    console.log(Math.ceil(monthlyInvestment) + " Kč");
+    setResult(monthlyInvestment);
     setIsModalOpen(true);
   }
 
