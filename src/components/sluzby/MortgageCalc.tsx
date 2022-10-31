@@ -2,6 +2,7 @@ import Button from "@components/Button";
 import RangeSlider from "@components/calculator/RangeSlider";
 import Input from "@components/forms/Input";
 import SelectTemp from "@components/forms/SelectTemp";
+import emailjs from "@emailjs/browser";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
@@ -12,11 +13,12 @@ type MortgageCalcProps = {
 export default function MortgageCalc({ className = "" }: MortgageCalcProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputData, setInputData] = useState({
+    kalkulacka: "Hypotéky",
     pujcka: 0,
     nemovitost: 0,
     splatnost: 0,
     sazba: 5.99,
-    ucetUveru: "",
+    ucelUveru: "",
     druhNemovitosti: "",
   });
   const [result, setResult] = useState<number>(0);
@@ -135,11 +137,37 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
       )
     ) {
       setEmailVerified(true);
+      sendEmail();
     } else {
       setEmailAlert(true);
       setTimeout(() => {
         setEmailAlert(false);
       }, 2500);
+    }
+
+    function sendEmail() {
+      emailjs.send(
+        //process.env.SERVICE_ID!,
+        "service_jlz369o",
+        "template_w729jur",
+        {
+          email: email,
+          calc: inputData.kalkulacka,
+          pujcka: inputData.pujcka.toLocaleString() + " Kč",
+          nemovitost: inputData.nemovitost.toLocaleString() + " Kč",
+          splatnost:
+            inputData.splatnost < 5
+              ? inputData.splatnost === 1
+                ? inputData.splatnost + " rok"
+                : inputData.splatnost + " roky"
+              : inputData.splatnost + " let",
+          sazba: inputData.sazba + " %",
+          ucelUveru: inputData.ucelUveru,
+          druhNemovitosti: inputData.druhNemovitosti,
+        },
+        "user_2tNsUaIQSULo6wFXKZVCs"
+        //process.env.PUBLIC_KEY!
+      );
     }
   }
   return (

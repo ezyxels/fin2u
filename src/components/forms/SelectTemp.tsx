@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type SelectOptions = {
   as?: React.ElementType;
@@ -20,6 +20,10 @@ export default function SelectTemp({
   ...rest
 }: SelectOptions) {
   const [value, setValue] = useState<string>();
+
+  useEffect(() => {
+    setValueAndInputData(values[0]);
+  }, []);
 
   function setValueAndInputData(e: string) {
     changeData !== undefined && changeData(id, e);
