@@ -1,6 +1,7 @@
 import Button from "@components/Button";
 import RangeSlider from "@components/calculator/RangeSlider";
 import Input from "@components/forms/Input";
+import emailjs from "@emailjs/browser";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 
@@ -19,8 +20,7 @@ export default function InvestmentCalc({
     investovat: 0,
     urok: 7,
     odklad: 0,
-    cerpatCas: 0,
-  }); 
+  });
   const [result, setResult] = useState<number>(0);
 
   function letsCalcIt() {
@@ -35,11 +35,9 @@ export default function InvestmentCalc({
     let monthlyInvestment =
       -(ir * (-1 * futureInvestment + q * alreadyInvested)) / (-1 + q);
 
-    console.log(Math.ceil(monthlyInvestment) + " Kč");
-    setResult(monthlyInvestment);
+    setResult(Math.ceil(monthlyInvestment));
     setIsModalOpen(true);
   }
-
 
   function changeData(id: string, value: number) {
     setInputData((prevState) => ({ ...prevState, [id]: value }));
@@ -68,22 +66,6 @@ export default function InvestmentCalc({
           unit={
             inputData.cerpatZa < 5
               ? inputData.cerpatZa === 1
-                ? "rok"
-                : "roky"
-              : "let"
-          }
-        />
-        <RangeSlider
-          changeData={changeData}
-          id={"cerpatCas"}
-          min={0}
-          max={30}
-          skip={1}
-          defaultValue={inputData.cerpatCas}
-          title={"Jak dlouho chcete peníze čerpat?"}
-          unit={
-            inputData.cerpatCas < 5
-              ? inputData.cerpatCas === 1
                 ? "rok"
                 : "roky"
               : "let"
@@ -157,27 +139,30 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
     }
 
     function sendEmail() {
-      /* emailjs.send(
+      console.log(inputData);
+      emailjs.send(
         "service_jlz369o",
         "template_w729jur",
         {
           email: email,
-          kalkulacka: inputData.kalkulacka,
-          pujcka: inputData.pujcka.toLocaleString() + " Kč",
-          nemovitost: inputData.nemovitost.toLocaleString() + " Kč",
-          splatnost:
-            inputData.splatnost < 5
-              ? inputData.splatnost === 1
-                ? inputData.splatnost + " rok"
-                : inputData.splatnost + " roky"
-              : inputData.splatnost + " let",
-          sazba: inputData.sazba + " %",
-          ucelUveru: inputData.ucelUveru,
-          druhNemovitosti: inputData.druhNemovitosti,
-          vysledek: result.toLocaleString() + " Kč"
+          kalkulacka: "Kalkulačka - " + inputData.kalkulacka,
+          pujcka: "Renta: " + inputData.renta.toLocaleString() + " Kč",
+          cerpatZa:
+            inputData.cerpatZa < 5
+              ? inputData.cerpatZa === 1
+                ? "Čerpat za: " + inputData.cerpatZa + " rok"
+                : "Čerpat za: " + inputData.cerpatZa + " roky"
+              : "Čerpat za: " + inputData.cerpatZa + " let",
+          sazba: "Úrok: " + inputData.urok + " %",
+          odklad: "Možný odklad: " + inputData.odklad + " Kč / měsíčně",
+          investovat:
+            "Současně investováno: " +
+            inputData.investovat.toLocaleString() +
+            " Kč",
+          vysledek: "Vypočtený výsledek: " + result.toLocaleString() + " Kč",
         },
         "user_2tNsUaIQSULo6wFXKZVCs"
-      ); */
+      );
     }
   }
   return (
@@ -256,19 +241,21 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
                   <p className="mt-2 text-sm text-gray-500">
                     Vaše výsledky můžete naleznout níže
                   </p>
-                  {/* <div className="mt-7 flex w-full flex-col">
+                  <div className="mt-7 flex w-full flex-col">
                     <div className="flex flex-row justify-between">
-                      <p className="hidden md:block">Při půjčce v hodnotě</p>
-                      <p className="block md:hidden">Při půjčce</p>
-                      <p>{inputData.pujcka.toLocaleString()} Kč</p>
+                      <p className="hidden md:block">Při rentě v hodnotě</p>
+                      <p className="block md:hidden">Při rentě</p>
+                      <p>{inputData.renta.toLocaleString()} Kč / měsíc</p>
                     </div>
                     <div className="flex flex-row justify-between">
-                      <p className="hidden md:block">A splatnostním období</p>
-                      <p className="block md:hidden">A splatnosti</p>
+                      <p className="hidden md:block">
+                        které začíná splatnost za
+                      </p>
+                      <p className="block md:hidden">se splatností za</p>
                       <p>
-                        {inputData.splatnost}{" "}
-                        {inputData.splatnost < 5
-                          ? inputData.splatnost === 1
+                        {inputData.cerpatZa}{" "}
+                        {inputData.cerpatZa < 5
+                          ? inputData.cerpatZa === 1
                             ? "rok"
                             : "roky"
                           : "let"}
@@ -276,16 +263,16 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
                     </div>
                     <div className="mt-3 flex flex-row justify-between">
                       <p className="hidden items-end md:flex">
-                        Činní měsíční splátka
+                        Činní měsíční investice
                       </p>
                       <p className="flex items-end md:hidden">
-                        Je měsíční splátka
+                        Je měsíční investice
                       </p>
                       <p className="text-lg underline underline-offset-4">
                         {result.toLocaleString()} Kč
                       </p>
                     </div>
-                  </div> */}
+                  </div>
                 </Dialog.Panel>
               )}
             </Transition.Child>

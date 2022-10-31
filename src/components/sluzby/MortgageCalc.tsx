@@ -160,19 +160,20 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
         "template_w729jur",
         {
           email: email,
-          kalkulacka: inputData.kalkulacka,
-          pujcka: inputData.pujcka.toLocaleString() + " Kč",
-          nemovitost: inputData.nemovitost.toLocaleString() + " Kč",
+          kalkulacka: "Kalkulačka - " + inputData.kalkulacka,
+          pujcka: "Půjčka: " + inputData.pujcka.toLocaleString() + " Kč",
+          nemovitost:
+            "Nemovitost: " + inputData.nemovitost.toLocaleString() + " Kč",
           splatnost:
-            inputData.splatnost < 5
+            inputData.splatnost < 5 && inputData.splatnost > 0
               ? inputData.splatnost === 1
-                ? inputData.splatnost + " rok"
-                : inputData.splatnost + " roky"
-              : inputData.splatnost + " let",
-          sazba: inputData.sazba + " %",
-          ucelUveru: inputData.ucelUveru,
-          druhNemovitosti: inputData.druhNemovitosti,
-          vysledek: result.toLocaleString() + " Kč"
+                ? "Splatnost: " + inputData.splatnost + " rok"
+                : "Splatnost: " + inputData.splatnost + " roky"
+              : "Splatnost: " + inputData.splatnost + " let",
+          sazba: "Sazba: " + inputData.sazba + " %",
+          ucelUveru: "Účel úvěru: " + inputData.ucelUveru,
+          druhNemovitosti: "Druh nemovitosti: " + inputData.druhNemovitosti,
+          vysledek: "Vypočítaný výsledek: " + result.toLocaleString() + " Kč",
         },
         "user_2tNsUaIQSULo6wFXKZVCs"
       );

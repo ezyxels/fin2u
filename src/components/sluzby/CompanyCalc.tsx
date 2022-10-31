@@ -20,7 +20,7 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
     splatnost: 0,
     sazba: 7,
     ucetUveru: "",
-  }); 
+  });
   const [result, setResult] = useState<number>(0);
 
   function letsCalcIt() {
@@ -136,12 +136,13 @@ export default function CompanyCalc({ className = "" }: CompanyCalcProps) {
           changeData={changeData}
           values={[
             "Klasický neúčelový úvěr",
-            "Účelový podnikatelský úvěr", 
-            "Leasing", "Provozní úvěry", 
+            "Účelový podnikatelský úvěr",
+            "Leasing",
+            "Provozní úvěry",
             "Kontokorentní úvěr",
             "Podnikatelské kreditní karty",
             "Investiční úvěry",
-            "Úvěry se zárukou Evropského investičního fondu"
+            "Úvěry se zárukou Evropského investičního fondu",
           ]}
           className="mt-12"
         />
@@ -199,20 +200,24 @@ function Modal({ isModalOpen, setIsModalOpen, inputData, result }: ModalProps) {
         "template_w729jur",
         {
           email: email,
-          kalkulacka: inputData.kalkulacka,
-          pujcka: inputData.pujcka.toLocaleString() + " Kč",
-          zastava: inputData.zastava === true ? "se zástavou" : "bez zástavy",
-          nemovitost: inputData.zajisteni.toLocaleString() + " Kč",
+          kalkulacka: "Kalkulačka - " + inputData.kalkulacka,
+          pujcka: "Půjčka: " + inputData.pujcka.toLocaleString() + " Kč",
+          zastava:
+            inputData.zastava === true
+              ? "Zástava: se zástavou"
+              : "Zástava: bez zástavy",
+          nemovitost:
+            "Nemovitost: " + inputData.zajisteni.toLocaleString() + " Kč",
           splatnost:
-            inputData.splatnost < 5
+            inputData.splatnost < 5 && inputData.splatnost > 0
               ? inputData.splatnost === 1
-                ? inputData.splatnost + " rok"
-                : inputData.splatnost + " roky"
-              : inputData.splatnost + " let",
-          sazba: inputData.sazba + " %",
-          ucelUveru: inputData.ucelUveru,
-          druhNemovitosti: inputData.druhNemovitosti,
-          vysledek: result.toLocaleString() + " Kč"
+                ? "Splatnost: " + inputData.splatnost + " rok"
+                : "Splatnost: " + inputData.splatnost + " roky"
+              : "Splatnost: " + inputData.splatnost + " let",
+          sazba: "Sazba: " + inputData.sazba + " %",
+          ucelUveru: "Účel úvěru: " + inputData.ucelUveru,
+          druhNemovitosti: "Druh nemovitosti: " + inputData.druhNemovitosti,
+          vysledek: "Vypočítaný výsledek: " + result.toLocaleString() + " Kč",
         },
         "user_2tNsUaIQSULo6wFXKZVCs"
       );
